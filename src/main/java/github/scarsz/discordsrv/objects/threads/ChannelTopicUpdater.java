@@ -39,7 +39,7 @@ public class ChannelTopicUpdater extends Thread {
         setName("DiscordSRV - Channel Topic Updater");
     }
 
-    boolean updateTopic(TextChannel channel, String topic, boolean lastFailed) {
+    private boolean updateTopic(TextChannel channel, String topic, boolean lastFailed) {
         if (StringUtils.isNotBlank(topic)) {
             try {
                 DiscordUtil.setTextChannelTopic(channel, topic);
@@ -59,14 +59,14 @@ public class ChannelTopicUpdater extends Thread {
         return lastFailed;
     }
 
-    void updateChatChannelTopic() {
+    private void updateChatChannelTopic() {
         TextChannel channel = DiscordSRV.getPlugin().getMainTextChannel();
         String topic = PlaceholderUtil.replaceChannelUpdaterPlaceholders(LangUtil.Message.CHAT_CHANNEL_TOPIC.toString());
 
         lastUpdateChatChannelTopicFailed = updateTopic(channel, topic, lastUpdateChatChannelTopicFailed);
     }
 
-    void updateConsoleChannelTopic() {
+    private void updateConsoleChannelTopic() {
         TextChannel channel = DiscordSRV.getPlugin().getConsoleChannel();
         String topic = PlaceholderUtil.replaceChannelUpdaterPlaceholders(LangUtil.Message.CONSOLE_CHANNEL_TOPIC.toString());
 
