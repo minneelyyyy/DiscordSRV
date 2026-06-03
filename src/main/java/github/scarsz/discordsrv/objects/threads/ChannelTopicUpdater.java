@@ -24,6 +24,7 @@ import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.util.DiscordUtil;
 import github.scarsz.discordsrv.util.LangUtil;
 import github.scarsz.discordsrv.util.PlaceholderUtil;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import org.apache.commons.lang3.StringUtils;
@@ -32,45 +33,29 @@ import java.util.concurrent.TimeUnit;
 
 public class ChannelTopicUpdater extends Thread {
 
-    boolean lastUpdateChatChannelTopicFailed = false;
-    boolean lastUpdateConsoleChannelTopicFailed = false;
+    private final AtomicBoolean hasFailedUpdateChatChannelTopic = new AtomicBoolean(false);
+    private final AtomicBoolean hasFailedUpdateConsoleChannelTopic = new AtomicBoolean(false);
 
     public ChannelTopicUpdater() {
         setName("DiscordSRV - Channel Topic Updater");
     }
 
-    private boolean updateTopic(TextChannel channel, String topic, boolean lastFailed) {
+    private void updateTopic(TextChannel channel, String topic, AtomicBoolean hasFailed) {
         if (StringUtils.isNotBlank(topic)) {
             try {
                 DiscordUtil.setTextChannelTopic(channel, topic);
             } catch (PermissionException e) {
-                if (!lastFailed) {
+                if (!hasFailed.get()) {
                     DiscordSRV.warning("The bot requires the permission " + e.getPermission()
                             + " to set topic for the channel #" + channel.getName()
                             + ". Topic updating will not work until permission is given.");
 
-                    return true;
+                    hasFailed.set(true);
                 }
+                return;
             }
-
-            return false;
+            hasFailed.set(false);
         }
-
-        return lastFailed;
-    }
-
-    private void updateChatChannelTopic() {
-        TextChannel channel = DiscordSRV.getPlugin().getMainTextChannel();
-        String topic = PlaceholderUtil.replaceChannelUpdaterPlaceholders(LangUtil.Message.CHAT_CHANNEL_TOPIC.toString());
-
-        lastUpdateChatChannelTopicFailed = updateTopic(channel, topic, lastUpdateChatChannelTopicFailed);
-    }
-
-    private void updateConsoleChannelTopic() {
-        TextChannel channel = DiscordSRV.getPlugin().getConsoleChannel();
-        String topic = PlaceholderUtil.replaceChannelUpdaterPlaceholders(LangUtil.Message.CONSOLE_CHANNEL_TOPIC.toString());
-
-        lastUpdateConsoleChannelTopicFailed = updateTopic(channel, topic, lastUpdateConsoleChannelTopicFailed);
     }
 
     @Override
@@ -80,8 +65,11 @@ public class ChannelTopicUpdater extends Thread {
             if (rate < 10) rate = 10;
 
             if (DiscordUtil.getJda() != null) {
-                updateChatChannelTopic();
-                updateConsoleChannelTopic();
+                String chatTopic = PlaceholderUtil.replaceChannelUpdaterPlaceholders(LangUtil.Message.CHAT_CHANNEL_TOPIC.toString());
+                updateTopic(DiscordSRV.getPlugin().getMainTextChannel(), chatTopic, hasFailedUpdateChatChannelTopic);
+
+                String consoleTopic = PlaceholderUtil.replaceChannelUpdaterPlaceholders(LangUtil.Message.CONSOLE_CHANNEL_TOPIC.toString());
+                updateTopic(DiscordSRV.getPlugin().getConsoleChannel(), consoleTopic, hasFailedUpdateConsoleChannelTopic);
             } else {
                 DiscordSRV.debug("Skipping channel topic update cycle, JDA was null");
             }

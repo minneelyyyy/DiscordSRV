@@ -1419,35 +1419,23 @@ public class DiscordSRV extends JavaPlugin {
                     String totalPlayers = Integer.toString(getTotalPlayerCount());
                     String shutdownTimestamp = Long.toString(System.currentTimeMillis() / 1000);
 
-                    TextChannel mainTextChannel = getMainTextChannel();
+                    DiscordUtil.setTextChannelTopic(
+                            getMainTextChannel(),
+                            LangUtil.Message.CHAT_CHANNEL_TOPIC_AT_SERVER_SHUTDOWN.toString()
+                                    .replaceAll("%time%|%date%", time)
+                                    .replace("%serverversion%", serverVersion)
+                                    .replace("%totalplayers%", totalPlayers)
+                                    .replace("%timestamp%", shutdownTimestamp)
+                    );
 
-                    try {
-                        DiscordUtil.setTextChannelTopic(
-                                mainTextChannel,
-                                LangUtil.Message.CHAT_CHANNEL_TOPIC_AT_SERVER_SHUTDOWN.toString()
-                                        .replaceAll("%time%|%date%", time)
-                                        .replace("%serverversion%", serverVersion)
-                                        .replace("%totalplayers%", totalPlayers)
-                                        .replace("%timestamp%", shutdownTimestamp)
-                        );
-                    } catch (PermissionException e) {
-                        DiscordSRV.warning("Could not set topic of channel #" + mainTextChannel.getName() + " because the bot does not have the \"" + e.getPermission().getName() + "\" permission");
-                    }
-
-                    TextChannel consoleChannel = getConsoleChannel();
-
-                    try {
-                        DiscordUtil.setTextChannelTopic(
-                                consoleChannel,
-                                LangUtil.Message.CONSOLE_CHANNEL_TOPIC_AT_SERVER_SHUTDOWN.toString()
-                                        .replaceAll("%time%|%date%", time)
-                                        .replace("%serverversion%", serverVersion)
-                                        .replace("%totalplayers%", totalPlayers)
-                                        .replace("%timestamp%", shutdownTimestamp)
-                        );
-                    } catch (PermissionException e) {
-                        DiscordSRV.warning("Could not set topic of channel #" + consoleChannel.getName() + " because the bot does not have the \"" + e.getPermission().getName() + "\" permission");
-                    }
+                    DiscordUtil.setTextChannelTopic(
+                            getConsoleChannel(),
+                            LangUtil.Message.CONSOLE_CHANNEL_TOPIC_AT_SERVER_SHUTDOWN.toString()
+                                    .replaceAll("%time%|%date%", time)
+                                    .replace("%serverversion%", serverVersion)
+                                    .replace("%totalplayers%", totalPlayers)
+                                    .replace("%timestamp%", shutdownTimestamp)
+                    );
                 }
 
                 for (ChannelUpdater.UpdaterChannel updaterChannel : getChannelUpdater().getUpdaterChannels()) {
