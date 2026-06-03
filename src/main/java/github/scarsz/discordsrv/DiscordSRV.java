@@ -1418,7 +1418,6 @@ public class DiscordSRV extends JavaPlugin {
                     String serverVersion = Bukkit.getBukkitVersion();
                     String totalPlayers = Integer.toString(getTotalPlayerCount());
                     String shutdownTimestamp = Long.toString(System.currentTimeMillis() / 1000);
-
                     DiscordUtil.setTextChannelTopic(
                             getMainTextChannel(),
                             LangUtil.Message.CHAT_CHANNEL_TOPIC_AT_SERVER_SHUTDOWN.toString()
@@ -1427,7 +1426,6 @@ public class DiscordSRV extends JavaPlugin {
                                     .replace("%totalplayers%", totalPlayers)
                                     .replace("%timestamp%", shutdownTimestamp)
                     );
-
                     DiscordUtil.setTextChannelTopic(
                             getConsoleChannel(),
                             LangUtil.Message.CONSOLE_CHANNEL_TOPIC_AT_SERVER_SHUTDOWN.toString()
